@@ -1,0 +1,79 @@
+{%extends 'index.html'%}
+{%load staticfiles %}
+{% block contentwrapper %}
+	<div id="contentwrapper" class="col-lg-10 col-sm-10 col-xs-10 col-md-10">
+		<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 post-center">
+			<div class="col-xs-offset-2 col-sm-offset-2 col-md-offset-2 col-lg-offset-2">
+	    		{% ifequal nothing_yet.post True %}
+					<center class="text-muted">{{ nothing_yet.post_message }}</center>
+	    		{% endifequal %}
+				<center class="post-form-container-header">What's new ? Post it!</center>
+				<div class="post-form-container">
+						
+					<form enctype="multipart/form-data" id="postform" method="post" action="">
+						{% csrf_token %}
+						{{ form.title}}
+						{{ form.content}}
+						{{ form.image}}
+						<input type="submit" class="btn-green-square btn" value="{{submit_text}}">
+					</form>
+				</div>	
+				{% for post in posts %}	
+					<div class="post-wrapper">
+						<div class="post-capsule">
+					   		<div class="row">
+								<div class="dp-thumbnail col-lg-1 col-md-1 col-sm-1 col-xs-1">
+									<img src="{% static 'intranet/images/01.jpg' %}">
+								</div>
+								<div class="post-title col-lg-11 col-md-11 col-xs-11 col-sm-11">
+									<span class="post-title-text">{{ post.title }}<span>	
+								</div>
+					   		</div>
+					   		<div class="row">		
+								<span class="post-author">Posted by <a class="text-success">{{ post.author.get_full_name }}</a></span>
+								{% if post.if_image %}				
+									<div class="post-img">
+										<img src="{{post.image.url}}">
+									</div>
+								{% endif %}
+					    	</div>
+					    	<div class="row">	
+								<div class="post-content">
+									{{ post.content | linebreaks | truncatechars:255 }}
+								</div>
+					    	</div>		
+						</div>
+						<hr>
+						<center><a id="show-comments-{{post.id}}" class="show-comments"  onclick="showComments({{post.id}})">Show Comments</a></center>
+						<div id="comments-{{post.id}}" class="comments-box">
+							<form   id="comment-form" data-attrib="{{post.id}}">
+                                                	{% csrf_token %} 
+							{{ commentform.comment }}
+							<input type="submit" class="btn btn-green-square" value="comment">
+                                                	</form>
+							{% ifequal post.comments_nothing_yet True %}
+								<center class="text-muted">{{ nothing_yet.post_comments_message }}</center>
+							{% endifequal %}
+							
+							{% ifequal post.comments_nothing_yet False %}
+								<div class="comment-body" id="comment-body-{{post.id}}">
+								{% for comment in post.get_all_comments %}
+									
+									<div class="comment-wrapper" id="comment-wrapper-{{post.id}}">
+										<div class="comment-capsule">
+											<div class="comment-author" id="comment-{{post.id}}-{{comment.id}}-author">{{ comment.author.get_full_name }}</div>
+											<div class="comment-comment" id="comment-{{post.id}}-{{comment.id}}-comment">{{ comment.comment }}</div>
+											<div  class="comment-time" id="comment-{{post.id}}-{{comment.id}}-time">{{ comment.created_on }}</div>					
+										</div>	
+									</div>				
+								{% endfor %}
+								</div>
+							{% endifequal %}
+						</div>	
+						<center><a id="hide-comments-{{post.id}}" class="hide-comments"  onclick="hideComments({{post.id}})">Hide Comments</a></center>			
+					</div>	
+    			{% endfor %}
+    		</div>
+    	</div>
+    </div>	
+{% endblock %}	

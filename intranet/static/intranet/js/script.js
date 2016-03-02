@@ -1,0 +1,69 @@
+$(document).ready(function(){
+	$(".hide-comments").hide();
+	$(".comments-box").hide();
+	$('#intranet-body').css('background-color',' #e5faff');
+	$('input[name="image"]').inputfile({
+		uploadText: '<span class="glyphicon glyphicon-upload"></span> Upload an image',
+        	removeText: '<span class="glyphicon glyphicon-trash"></span>',
+        	restoreText: '<span class="glyphicon glyphicon-remove"></span>',
+        
+        	uploadButtonClass: 'btn btn-green',
+        	removeButtonClass: 'btn btn-default',
+    	});
+	
+        $('input[name="file_upload"]').inputfile({
+		uploadText: '<span class="glyphicon glyphicon-upload"></span> Upload a file',
+        	removeText: '<span class="glyphicon glyphicon-trash"></span>',
+        	restoreText: '<span class="glyphicon glyphicon-remove"></span>',
+        
+        	uploadButtonClass: 'btn btn-green',
+        	removeButtonClass: 'btn btn-default',
+    	});
+	window.showComments = function(postid){
+		$("#comments-"+postid).show();
+		$('#show-comments-'+postid).hide();
+		$('.hide-comments-'+postid).show();
+	}
+	window.hideComments = function(postid){
+		$('.show-comments').show();
+		$("#comments-"+postid).hide();
+		$(".hide-comments").hide();
+	}
+	$('#comment-form').on('submit', function(event){
+		
+    		event.preventDefault();
+    		console.log("form submitted!");  // sanity check
+		function getCookie(name) {
+   			var cookieValue = null;
+    			if (document.cookie && document.cookie != '') {
+       				var cookies = document.cookie.split(';');
+        			for (var i = 0; i < cookies.length; i++) {
+            				var cookie = jQuery.trim(cookies[i]);
+            				// Does this cookie string begin with the name we want?
+            				if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                				cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                				break;
+            				}
+        			}
+    			}
+    			return cookieValue;
+		}
+		var csrftoken = getCookie('csrftoken');
+		var commentform = $('#comment-form');
+		
+		var comment = $('#comment-text').val();
+		var url = '/comment_to_posts/';
+		alert(csrftoken);
+		$.post(url, { comment: comment,
+	          	      parent_post_id: commentform.attr('data-attrib'),
+			      csrfmiddlewaretoken :csrftoken	 
+               	},
+        	function(data){
+			alert("comment-wrapper-"+data['comment']['post_id']);
+			alert(data['author']);
+			var postid = data['comment']['post_id'];
+			var commentbody = document.getElementById('comment-body-'+postid);
+						
+        	});
+	});	
+});

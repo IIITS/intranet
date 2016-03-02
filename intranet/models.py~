@@ -1,0 +1,118 @@
+from __future__ import unicode_literals
+from django.contrib.auth.models import User
+from django.db import models
+from django.contrib.postgres.fields import ArrayField
+from intranet.methods import file_folder_allocator
+
+class Application(models.Model):
+	title		= models.CharField(max_length=255)
+	url		= models.URLField()
+	developer	= models.CharField(max_length=50)
+	if_logo		= models.BooleanField(default=False)	
+	logo		= models.ImageField(upload_to='images/application/')
+	description	= models.TextField()
+	def __str__():
+		return self.title
+class Post(models.Model):
+	title		= models.CharField(max_length=255)
+	content		= models.TextField()
+	author          = models.ForeignKey(User)
+	if_image	= models.BooleanField(default=False)
+	image		= models.ImageField(upload_to='images/posts/')
+	comments	= ArrayField(models.IntegerField(), null=True)
+	display		= models.BooleanField(default=True)
+	created_on	= models.DateTimeField(auto_now_add=True)	
+	def __str__(self):
+		return self.title
+	def get_all_comments(self):
+		LIST_OF_COMMENTS = list()
+		for comment_id  in self.comments:	
+			LIST_OF_COMMENTS.append(Comment.objects.get(id = comment_id))
+		return LIST_OF_COMMENTS
+	def comments_nothing_yet(self):
+		flag = True
+		try: 
+			flag = len(self.comments) == 0
+		except TypeError:
+			flag = True
+		return flag				
+class Notice(models.Model):
+	title		= models.CharField(max_length=255)
+	description	= models.TextField()
+	author		= models.ForeignKey(User)
+	if_mail		= models.BooleanField(default=False)
+	mail_list	= ArrayField(models.EmailField())
+	if_file		= models.BooleanField(default=False)
+	file_upload	= models.FileField(upload_to='files/notices/')
+	tags		= ArrayField(models.CharField(max_length=50))
+	created_on	= models.DateTimeField(auto_now_add=True)
+	display		= models.BooleanField(default=True)
+	def __str__(self):
+		return self.title
+class News(models.Model):
+	title		= models.CharField(max_length=255)
+	content		= models.TextField()
+	author		= models.ForeignKey(User)
+	if_image	= models.BooleanField(default=False)
+	image		= models.ImageField(upload_to='images/news')
+	if_file		= models.BooleanField(default=False)
+	file_upload	= models.FileField(upload_to='files/news/')
+	if_mail		= models.BooleanField(default=False)
+	mail_list	= ArrayField(models.EmailField())
+	tags		= ArrayField(models.CharField(max_length=50))
+	display		= models.BooleanField(default=True)
+	created_on	= models.DateTimeField(auto_now_add=True)
+	def __str__(self):
+		return self.title	
+class Comment(models.Model):
+	comment		= models.TextField()
+	author		= models.ForeignKey(User)
+	post		= models.ForeignKey(Post)
+	created_on	= models.DateTimeField(auto_now_add=True)
+	display         = models.BooleanField(default=True)
+ 	def __str__(self):
+		return str(self.comment)
+class Suggestion(models.Model):
+	author		= models.ForeignKey(User)
+	suggestion	= models.TextField()
+	created_on	= models.DateTimeField(auto_now_add=True)
+	def __str__(self):
+		return self.suggestion	 
+class Link(models.Model):
+	url		= models.CharField(max_length=255)
+	name		= models.CharField(max_length=50)
+	rank		= models.IntegerField(unique=True, editable=True)
+ 	def __str__(self):
+		return self.name
+class LeftLink(models.Model):
+	url		= models.CharField(max_length=255)
+	name		= models.CharField(max_length=50)
+	rank		= models.IntegerField(unique=True, editable=True)
+	icon		= models.CharField(max_length=200, null=True)
+ 	def __str__(self):
+		return self.name
+class Tag(models.Model):
+	name		= models.CharField(max_length=50)
+	description	= models.TextField()
+	created_on	= models.DateTimeField(auto_now_add=True)
+	def __str__(self):
+		return self.name
+class Resource(models.Model):
+	title		= models.CharField(max_length=255)
+	author		= models.ForeignKey(User)
+	if_file		= models.BooleanField(default=False)
+	file_upload	= models.FileField(upload_to='files/resources/') 
+	tags		= ArrayField(models.CharField(max_length=50))
+	created_on	= models.DateTimeField(auto_now_add=True)
+	display		= models.BooleanField(default=True)
+	def __str__(self):
+		return self.title
+class Section(models.Model):
+	name		= models.CharField(max_length=50)
+	showin		= ArrayField(models.CharField(max_length=50))
+	tags		= ArrayField(models.CharField(max_length=50))
+	url		= models.CharField(max_length=255)
+	rank		= models.IntegerField(unique=True, editable=True)
+	created_on	= models.DateTimeField(auto_now_add=True)
+	def __str__(self):
+		return self.name
